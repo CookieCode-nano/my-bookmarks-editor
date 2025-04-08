@@ -1,6 +1,5 @@
-
 import React from "react";
-import { Bookmark, FileImport, FileExport, Search, FileText } from "lucide-react";
+import { Bookmark, FileText, Search } from "lucide-react";
 
 interface HeaderProps {
   title: string;
@@ -15,11 +14,11 @@ const Header: React.FC<HeaderProps> = ({ title }) => {
       <div className="ml-auto">
         <nav className="flex gap-4">
           <a href="#" className="text-gray-600 hover:text-gray-900 flex items-center gap-1">
-            <FileImport className="h-4 w-4" />
+            <FileText className="h-4 w-4" />
             <span>匯入書籤</span>
           </a>
           <a href="#" className="text-gray-600 hover:text-gray-900 flex items-center gap-1">
-            <FileText className="h-4 w-4" /> {/* Changed from FileExport */}
+            <FileText className="h-4 w-4" />
             <span>匯出書籤</span>
           </a>
           <a href="#" className="text-gray-600 hover:text-gray-900 flex items-center gap-1">
