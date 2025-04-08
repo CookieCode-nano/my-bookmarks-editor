@@ -22,3 +22,10 @@ export interface DragItem {
   sectionId: string;
   index: number;
 }
+
+// Export/Import related types
+export interface BookmarkExport {
+  sections: Section[];
+  exportDate: string;
+  version: string;
+}

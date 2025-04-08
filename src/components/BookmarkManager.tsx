@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from "@/components/ui/resizable";
 import { Bookmark, Section, DragItem } from "@/types/bookmarks";
@@ -58,7 +57,6 @@ const BookmarkManager = () => {
     }
     
     setPanelCount(panelCount + 1);
-    // 添加新的空白部分
     setSections([...sections, {
       id: `${sections.length + 1}`,
       title: `書籤集 ${sections.length + 1}`,
@@ -82,7 +80,6 @@ const BookmarkManager = () => {
     }
     
     setPanelCount(panelCount - 1);
-    // 移除指定部分
     const newSections = [...sections];
     newSections.splice(index, 1);
     setSections(newSections);
@@ -101,7 +98,25 @@ const BookmarkManager = () => {
     setPreviewVisible(!previewVisible);
   };
 
-  // Drag and drop handlers
+  const handleImportBookmarks = (importedSections: Section[]) => {
+    const newSections = importedSections.map((section, sectionIndex) => {
+      const newSection = {
+        ...section,
+        id: `imported-${sectionIndex}-${Date.now()}`,
+        bookmarks: section.bookmarks.map((bookmark, bookmarkIndex) => ({
+          ...bookmark,
+          id: `imported-${sectionIndex}-${bookmarkIndex}-${Date.now()}`
+        }))
+      };
+      return newSection;
+    });
+    
+    setSections([...sections, ...newSections]);
+    
+    const newPanelCount = Math.min(4, sections.length + newSections.length);
+    setPanelCount(newPanelCount);
+  };
+
   const handleDragStart = (item: DragItem) => {
     setDraggedItem(item);
   };
@@ -118,25 +133,19 @@ const BookmarkManager = () => {
     
     const { bookmark, sectionId: sourceSectionId } = draggedItem;
     
-    // Don't do anything if dropping onto the same section
     if (sourceSectionId === targetSectionId) return;
     
-    // Create new sections array
     const newSections = [...sections];
     
-    // Find source and target sections
     const sourceSection = newSections.find(s => s.id === sourceSectionId);
     const targetSection = newSections.find(s => s.id === targetSectionId);
     
     if (!sourceSection || !targetSection) return;
     
-    // Remove bookmark from source section
     sourceSection.bookmarks = sourceSection.bookmarks.filter(b => b.id !== bookmark.id);
     
-    // Add bookmark to target section
     targetSection.bookmarks = [...targetSection.bookmarks, bookmark];
     
-    // Update state
     setSections(newSections);
     setDraggedItem(null);
     
@@ -152,7 +161,11 @@ const BookmarkManager = () => {
 
   return (
     <div className="flex flex-col h-screen overflow-hidden">
-      <Header title="書籤管理" />
+      <Header 
+        title="書籤管理" 
+        sections={sections}
+        onImport={handleImportBookmarks}
+      />
       
       <div className="flex flex-col h-full">
         <ResizablePanelGroup direction="horizontal" className="flex-grow">
