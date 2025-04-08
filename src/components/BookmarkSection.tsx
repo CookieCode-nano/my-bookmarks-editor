@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect } from "react";
-import { Search, Minus, ArrowDown, ArrowUp } from "lucide-react";
-import { Section, Bookmark } from "@/types/bookmarks";
+import { Search, Minus, ArrowDown, ArrowUp, Move } from "lucide-react";
+import { Section, Bookmark, DragItem } from "@/types/bookmarks";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
 import { 
@@ -16,12 +16,22 @@ interface BookmarkSectionProps {
   section: Section;
   onSelectBookmark: (bookmark: Bookmark) => void;
   onRemove: () => void;
+  onDragStart: (item: DragItem) => void;
+  onDragOver: (e: React.DragEvent) => void;
+  onDrop: (e: React.DragEvent) => void;
+  onDragEnd: () => void;
+  isDragging: boolean;
 }
 
 const BookmarkSection: React.FC<BookmarkSectionProps> = ({
   section,
   onSelectBookmark,
   onRemove,
+  onDragStart,
+  onDragOver,
+  onDrop,
+  onDragEnd,
+  isDragging,
 }) => {
   const [searchTerm, setSearchTerm] = useState("");
   const [filteredBookmarks, setFilteredBookmarks] = useState<Bookmark[]>(section.bookmarks);
@@ -76,7 +86,14 @@ const BookmarkSection: React.FC<BookmarkSectionProps> = ({
   };
 
   return (
-    <div className="flex flex-col h-full border-r border-gray-200 bg-white">
+    <div 
+      className={cn(
+        "flex flex-col h-full border-r border-gray-200 bg-white",
+        isDragging && "bg-blue-50"
+      )}
+      onDragOver={onDragOver}
+      onDrop={onDrop}
+    >
       <div className="p-3 border-b border-gray-200 flex items-center justify-between">
         <button
           onClick={toggleSortDirection}
@@ -126,13 +143,24 @@ const BookmarkSection: React.FC<BookmarkSectionProps> = ({
           </div>
         ) : (
           <ul className="divide-y divide-gray-100">
-            {filteredBookmarks.map((bookmark) => (
+            {filteredBookmarks.map((bookmark, index) => (
               <li key={bookmark.id}>
-                <button
+                <div
                   className={cn(
                     "w-full text-left p-3 hover:bg-blue-50 transition-colors",
-                    "flex items-start gap-3"
+                    "flex items-start gap-3 cursor-move relative"
                   )}
+                  draggable
+                  onDragStart={(e) => {
+                    e.dataTransfer.effectAllowed = 'move';
+                    onDragStart({
+                      type: 'bookmark',
+                      bookmark,
+                      sectionId: section.id,
+                      index
+                    });
+                  }}
+                  onDragEnd={onDragEnd}
                   onClick={() => onSelectBookmark(bookmark)}
                 >
                   <div className="flex-shrink-0 w-5 h-5 mt-0.5">
@@ -170,7 +198,8 @@ const BookmarkSection: React.FC<BookmarkSectionProps> = ({
                       />
                     )}
                   </div>
-                </button>
+                  <Move size={14} className="text-gray-400 absolute right-2 top-3 opacity-50" />
+                </div>
               </li>
             ))}
           </ul>

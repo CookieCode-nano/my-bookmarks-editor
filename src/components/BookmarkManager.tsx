@@ -1,7 +1,7 @@
 
 import React, { useState } from "react";
 import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from "@/components/ui/resizable";
-import { Bookmark, Section } from "@/types/bookmarks";
+import { Bookmark, Section, DragItem } from "@/types/bookmarks";
 import BookmarkSection from "./BookmarkSection";
 import BottomPreview from "./BottomPreview";
 import Header from "./Header";
@@ -44,6 +44,7 @@ const BookmarkManager = () => {
   const [panelCount, setPanelCount] = useState(2);
   const [selectedBookmark, setSelectedBookmark] = useState<Bookmark | null>(null);
   const [previewVisible, setPreviewVisible] = useState(true);
+  const [draggedItem, setDraggedItem] = useState<DragItem | null>(null);
   const { toast } = useToast();
 
   const handleAddPanel = () => {
@@ -100,6 +101,55 @@ const BookmarkManager = () => {
     setPreviewVisible(!previewVisible);
   };
 
+  // Drag and drop handlers
+  const handleDragStart = (item: DragItem) => {
+    setDraggedItem(item);
+  };
+
+  const handleDragOver = (e: React.DragEvent, sectionId: string) => {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = 'move';
+  };
+
+  const handleDrop = (e: React.DragEvent, targetSectionId: string) => {
+    e.preventDefault();
+    
+    if (!draggedItem) return;
+    
+    const { bookmark, sectionId: sourceSectionId } = draggedItem;
+    
+    // Don't do anything if dropping onto the same section
+    if (sourceSectionId === targetSectionId) return;
+    
+    // Create new sections array
+    const newSections = [...sections];
+    
+    // Find source and target sections
+    const sourceSection = newSections.find(s => s.id === sourceSectionId);
+    const targetSection = newSections.find(s => s.id === targetSectionId);
+    
+    if (!sourceSection || !targetSection) return;
+    
+    // Remove bookmark from source section
+    sourceSection.bookmarks = sourceSection.bookmarks.filter(b => b.id !== bookmark.id);
+    
+    // Add bookmark to target section
+    targetSection.bookmarks = [...targetSection.bookmarks, bookmark];
+    
+    // Update state
+    setSections(newSections);
+    setDraggedItem(null);
+    
+    toast({
+      title: "已移動書籤",
+      description: `成功將「${bookmark.title}」移動到「${targetSection.title}」`,
+    });
+  };
+
+  const handleDragEnd = () => {
+    setDraggedItem(null);
+  };
+
   return (
     <div className="flex flex-col h-screen overflow-hidden">
       <Header title="書籤管理" />
@@ -114,6 +164,11 @@ const BookmarkManager = () => {
                   section={section} 
                   onSelectBookmark={handleSelectBookmark}
                   onRemove={() => handleRemovePanel(index)}
+                  onDragStart={handleDragStart}
+                  onDragOver={(e) => handleDragOver(e, section.id)}
+                  onDrop={(e) => handleDrop(e, section.id)}
+                  onDragEnd={handleDragEnd}
+                  isDragging={!!draggedItem}
                 />
               </ResizablePanel>
             </React.Fragment>

@@ -14,3 +14,11 @@ export interface Section {
   title: string;
   bookmarks: Bookmark[];
 }
+
+// Drag and drop related types
+export interface DragItem {
+  type: 'bookmark';
+  bookmark: Bookmark;
+  sectionId: string;
+  index: number;
+}
