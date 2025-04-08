@@ -1,9 +1,16 @@
 
 import React, { useState, useEffect } from "react";
-import { Search, Minus } from "lucide-react";
+import { Search, Minus, ArrowDown, ArrowUp } from "lucide-react";
 import { Section, Bookmark } from "@/types/bookmarks";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
+import { 
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue
+} from "@/components/ui/select";
 
 interface BookmarkSectionProps {
   section: Section;
@@ -18,7 +25,10 @@ const BookmarkSection: React.FC<BookmarkSectionProps> = ({
 }) => {
   const [searchTerm, setSearchTerm] = useState("");
   const [filteredBookmarks, setFilteredBookmarks] = useState<Bookmark[]>(section.bookmarks);
+  const [sortBy, setSortBy] = useState<"title" | "date">("title");
+  const [sortDirection, setSortDirection] = useState<"asc" | "desc">("asc");
 
+  // Filter bookmarks based on search term
   useEffect(() => {
     if (searchTerm.trim() === "") {
       setFilteredBookmarks(section.bookmarks);
@@ -35,6 +45,29 @@ const BookmarkSection: React.FC<BookmarkSectionProps> = ({
     }
   }, [searchTerm, section.bookmarks]);
 
+  // Sort bookmarks
+  useEffect(() => {
+    const sortedBookmarks = [...filteredBookmarks].sort((a, b) => {
+      if (sortBy === "title") {
+        return sortDirection === "asc" 
+          ? a.title.localeCompare(b.title) 
+          : b.title.localeCompare(a.title);
+      } else {
+        // Assuming each bookmark has an id that's somewhat related to creation date
+        // In a real app, you'd use an actual date field
+        return sortDirection === "asc" 
+          ? a.id.localeCompare(b.id) 
+          : b.id.localeCompare(a.id);
+      }
+    });
+    
+    setFilteredBookmarks(sortedBookmarks);
+  }, [sortBy, sortDirection]);
+
+  const toggleSortDirection = () => {
+    setSortDirection(sortDirection === "asc" ? "desc" : "asc");
+  };
+
   const highlightMatch = (text: string, term: string) => {
     if (!term.trim()) return text;
     
@@ -45,7 +78,26 @@ const BookmarkSection: React.FC<BookmarkSectionProps> = ({
   return (
     <div className="flex flex-col h-full border-r border-gray-200 bg-white">
       <div className="p-3 border-b border-gray-200 flex items-center justify-between">
-        <h3 className="font-medium text-gray-700">{section.title}</h3>
+        <button
+          onClick={toggleSortDirection}
+          className="flex items-center text-gray-700 hover:text-gray-900"
+        >
+          {sortDirection === "asc" ? <ArrowUp size={16} /> : <ArrowDown size={16} />}
+        </button>
+        
+        <Select
+          value={sortBy}
+          onValueChange={(value) => setSortBy(value as "title" | "date")}
+        >
+          <SelectTrigger className="w-32 h-8 text-xs">
+            <SelectValue placeholder="排序方式" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="title">名稱</SelectItem>
+            <SelectItem value="date">新增日期</SelectItem>
+          </SelectContent>
+        </Select>
+        
         <button
           onClick={onRemove}
           className="p-1 text-gray-500 hover:bg-gray-100 rounded-full"

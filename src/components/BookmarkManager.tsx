@@ -12,7 +12,7 @@ import { useToast } from "@/hooks/use-toast";
 const mockSections: Section[] = [
   {
     id: "1",
-    title: "Section 1 第1部分",
+    title: "書籤集 1",
     bookmarks: [
       { id: "1-1", title: "Google", url: "https://google.com", folder: "搜索引擎" },
       { id: "1-2", title: "GitHub", url: "https://github.com", folder: "開發工具" },
@@ -21,7 +21,7 @@ const mockSections: Section[] = [
   },
   {
     id: "2",
-    title: "Section 2",
+    title: "書籤集 2",
     bookmarks: [
       { id: "2-1", title: "YouTube", url: "https://youtube.com", folder: "娛樂" },
       { id: "2-2", title: "Netflix", url: "https://netflix.com", folder: "娛樂" },
@@ -30,7 +30,7 @@ const mockSections: Section[] = [
   },
   {
     id: "3",
-    title: "Section 3",
+    title: "書籤集 3",
     bookmarks: [
       { id: "3-1", title: "Amazon", url: "https://amazon.com", folder: "購物" },
       { id: "3-2", title: "eBay", url: "https://ebay.com", folder: "購物" },
@@ -60,7 +60,7 @@ const BookmarkManager = () => {
     // 添加新的空白部分
     setSections([...sections, {
       id: `${sections.length + 1}`,
-      title: `Section ${sections.length + 1}`,
+      title: `書籤集 ${sections.length + 1}`,
       bookmarks: []
     }]);
 

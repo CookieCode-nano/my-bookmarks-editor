@@ -11,9 +11,16 @@ interface BottomPreviewProps {
 
 const BottomPreview: React.FC<BottomPreviewProps> = ({ bookmark, onToggle }) => {
   const [expanded, setExpanded] = useState(false);
+  const [showWebPreview, setShowWebPreview] = useState(false);
 
   const handleToggleExpand = () => {
     setExpanded(!expanded);
+  };
+
+  const handlePreviewClick = () => {
+    if (bookmark) {
+      setShowWebPreview(true);
+    }
   };
 
   return (
@@ -64,68 +71,84 @@ const BottomPreview: React.FC<BottomPreviewProps> = ({ bookmark, onToggle }) => 
               </div>
             ) : (
               <div className="flex flex-col h-full">
-                <div className="flex items-start gap-4">
-                  <div className="flex-shrink-0 w-10 h-10 bg-gray-100 rounded-md flex items-center justify-center">
-                    {bookmark.favicon ? (
-                      <img
-                        src={bookmark.favicon}
-                        alt=""
-                        className="w-6 h-6 object-contain"
-                      />
-                    ) : (
-                      <div className="text-xl font-bold text-gray-400">
-                        {bookmark.title.charAt(0)}
-                      </div>
-                    )}
-                  </div>
-                  <div className="flex-grow">
-                    <h2 className="text-xl font-semibold text-gray-800">
-                      {bookmark.title}
-                    </h2>
-                    <a
-                      href={bookmark.url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-blue-600 hover:underline text-sm break-all"
-                    >
-                      {bookmark.url}
-                    </a>
-                    
-                    {bookmark.folder && (
-                      <div className="mt-2">
-                        <span className="text-sm text-gray-500">文件夾：</span>
-                        <span className="ml-1 text-sm px-2 py-1 bg-gray-100 rounded-md">
-                          {bookmark.folder}
-                        </span>
-                      </div>
-                    )}
-                    
-                    {bookmark.tags && bookmark.tags.length > 0 && (
-                      <div className="mt-2">
-                        <span className="text-sm text-gray-500">標籤：</span>
-                        <div className="flex flex-wrap gap-1 mt-1">
-                          {bookmark.tags.map((tag, index) => (
-                            <span
-                              key={index}
-                              className="px-2 py-1 bg-blue-50 text-blue-700 text-xs rounded-md"
-                            >
-                              {tag}
-                            </span>
-                          ))}
+                {!showWebPreview ? (
+                  <div className="flex items-start gap-4 cursor-pointer" onClick={handlePreviewClick}>
+                    <div className="flex-shrink-0 w-10 h-10 bg-gray-100 rounded-md flex items-center justify-center">
+                      {bookmark.favicon ? (
+                        <img
+                          src={bookmark.favicon}
+                          alt=""
+                          className="w-6 h-6 object-contain"
+                        />
+                      ) : (
+                        <div className="text-xl font-bold text-gray-400">
+                          {bookmark.title.charAt(0)}
                         </div>
+                      )}
+                    </div>
+                    <div className="flex-grow">
+                      <h2 className="text-xl font-semibold text-gray-800">
+                        {bookmark.title}
+                      </h2>
+                      <a
+                        href={bookmark.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-blue-600 hover:underline text-sm break-all"
+                        onClick={(e) => e.stopPropagation()}
+                      >
+                        {bookmark.url}
+                      </a>
+                      
+                      {bookmark.folder && (
+                        <div className="mt-2">
+                          <span className="text-sm text-gray-500">文件夾：</span>
+                          <span className="ml-1 text-sm px-2 py-1 bg-gray-100 rounded-md">
+                            {bookmark.folder}
+                          </span>
+                        </div>
+                      )}
+                      
+                      {bookmark.tags && bookmark.tags.length > 0 && (
+                        <div className="mt-2">
+                          <span className="text-sm text-gray-500">標籤：</span>
+                          <div className="flex flex-wrap gap-1 mt-1">
+                            {bookmark.tags.map((tag, index) => (
+                              <span
+                                key={index}
+                                className="px-2 py-1 bg-blue-50 text-blue-700 text-xs rounded-md"
+                              >
+                                {tag}
+                              </span>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+                      
+                      <div className="mt-4 text-sm text-blue-600 flex items-center">
+                        <span>點擊查看網站預覽</span>
                       </div>
-                    )}
+                    </div>
                   </div>
-                </div>
-                
-                {expanded && (
-                  <div className="mt-6 flex-grow border border-gray-200 rounded-md overflow-hidden">
-                    <iframe
-                      src={bookmark.url}
-                      title={bookmark.title}
-                      className="w-full h-full"
-                      sandbox="allow-scripts allow-same-origin"
-                    />
+                ) : (
+                  <div className="h-full flex flex-col">
+                    <div className="mb-2 flex justify-between items-center">
+                      <h3 className="font-medium text-gray-700 truncate">{bookmark.title}</h3>
+                      <button 
+                        onClick={() => setShowWebPreview(false)}
+                        className="text-xs text-gray-500 hover:text-gray-700"
+                      >
+                        返回詳情
+                      </button>
+                    </div>
+                    <div className={`flex-grow border border-gray-200 rounded-md overflow-hidden ${expanded ? 'h-full' : 'h-40'}`}>
+                      <iframe
+                        src={bookmark.url}
+                        title={bookmark.title}
+                        className="w-full h-full"
+                        sandbox="allow-scripts allow-same-origin"
+                      />
+                    </div>
                   </div>
                 )}
               </div>
