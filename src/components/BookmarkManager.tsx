@@ -1,13 +1,12 @@
 import React, { useState } from "react";
 import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from "@/components/ui/resizable";
-import { Bookmark, Section, DragItem } from "@/types/bookmarks";
+import { Bookmark, Section, DragItem, BookmarkTitleChange, TitleCleanerState } from "@/types/bookmarks";
 import BookmarkSection from "./BookmarkSection";
 import BottomPreview from "./BottomPreview";
 import Header from "./Header";
 import { PlusCircle } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
-// 模擬數據
 const mockSections: Section[] = [
   {
     id: "1",
@@ -45,6 +44,11 @@ const BookmarkManager = () => {
   const [previewVisible, setPreviewVisible] = useState(true);
   const [draggedItem, setDraggedItem] = useState<DragItem | null>(null);
   const { toast } = useToast();
+  
+  const [titleCleanerState, setTitleCleanerState] = useState<TitleCleanerState>({
+    changes: [],
+    appliedChanges: []
+  });
 
   const handleAddPanel = () => {
     if (panelCount >= 4) {
@@ -159,12 +163,71 @@ const BookmarkManager = () => {
     setDraggedItem(null);
   };
 
+  const handleUpdateBookmarkTitles = (changes: BookmarkTitleChange[]) => {
+    if (!changes.length) return;
+
+    const newSections = [...sections];
+    
+    changes.forEach(change => {
+      const sectionIndex = newSections.findIndex(s => s.id === change.sectionId);
+      if (sectionIndex === -1) return;
+      
+      const bookmarkIndex = newSections[sectionIndex].bookmarks.findIndex(
+        b => b.id === change.bookmarkId
+      );
+      if (bookmarkIndex === -1) return;
+      
+      newSections[sectionIndex].bookmarks[bookmarkIndex].title = change.newTitle;
+    });
+    
+    setSections(newSections);
+    
+    setTitleCleanerState(prev => ({
+      changes: [...prev.changes, ...changes],
+      appliedChanges: [...prev.appliedChanges, ...changes]
+    }));
+  };
+
+  const handleUndoTitleChanges = () => {
+    if (!titleCleanerState.appliedChanges.length) return;
+    
+    const lastChangeBatch = titleCleanerState.appliedChanges;
+    const newSections = [...sections];
+    
+    lastChangeBatch.forEach(change => {
+      const sectionIndex = newSections.findIndex(s => s.id === change.sectionId);
+      if (sectionIndex === -1) return;
+      
+      const bookmarkIndex = newSections[sectionIndex].bookmarks.findIndex(
+        b => b.id === change.bookmarkId
+      );
+      if (bookmarkIndex === -1) return;
+      
+      newSections[sectionIndex].bookmarks[bookmarkIndex].title = change.oldTitle;
+    });
+    
+    setSections(newSections);
+    
+    setTitleCleanerState(prev => ({
+      ...prev,
+      appliedChanges: []
+    }));
+    
+    toast({
+      title: "還原成功",
+      description: `已還原 ${lastChangeBatch.length} 個書籤標題變更`,
+    });
+  };
+
   return (
     <div className="flex flex-col h-screen overflow-hidden">
       <Header 
         title="書籤管理" 
         sections={sections}
         onImport={handleImportBookmarks}
+        onUpdateBookmarkTitles={handleUpdateBookmarkTitles}
+        onUndoTitleChanges={handleUndoTitleChanges}
+        canUndoTitleChanges={titleCleanerState.appliedChanges.length > 0}
       />
       
       <div className="flex flex-col h-full">

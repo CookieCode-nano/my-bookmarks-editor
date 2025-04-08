@@ -29,3 +29,16 @@ export interface BookmarkExport {
   exportDate: string;
   version: string;
 }
+
+// Title cleaner related types
+export interface BookmarkTitleChange {
+  bookmarkId: string;
+  sectionId: string;
+  oldTitle: string;
+  newTitle: string;
+}
+
+export interface TitleCleanerState {
+  changes: BookmarkTitleChange[];
+  appliedChanges: BookmarkTitleChange[];
+}

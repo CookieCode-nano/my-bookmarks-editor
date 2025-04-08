@@ -1,17 +1,28 @@
-
-import React from "react";
-import { Bookmark, FileText, Import, Share2 } from "lucide-react";
+import React, { useState } from "react";
+import { Bookmark, FileText, Import, Share2, FileX } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import { BookmarkExport, Section } from "@/types/bookmarks";
+import { BookmarkExport, BookmarkTitleChange, Section } from "@/types/bookmarks";
+import TitleCleaner from "./TitleCleaner";
 
 interface HeaderProps {
   title: string;
   sections?: Section[];
   onImport?: (sections: Section[]) => void;
+  onUpdateBookmarkTitles?: (changes: BookmarkTitleChange[]) => void;
+  onUndoTitleChanges?: () => void;
+  canUndoTitleChanges?: boolean;
 }
 
-const Header: React.FC<HeaderProps> = ({ title, sections = [], onImport }) => {
+const Header: React.FC<HeaderProps> = ({ 
+  title, 
+  sections = [], 
+  onImport,
+  onUpdateBookmarkTitles,
+  onUndoTitleChanges,
+  canUndoTitleChanges = false
+}) => {
   const { toast } = useToast();
+  const [titleCleanerOpen, setTitleCleanerOpen] = useState(false);
 
   const handleExportBookmarks = () => {
     if (!sections.length) {
@@ -118,16 +129,28 @@ const Header: React.FC<HeaderProps> = ({ title, sections = [], onImport }) => {
             <Share2 className="h-4 w-4" />
             <span>匯出書籤</span>
           </a>
-          <a href="#" className="text-gray-600 hover:text-gray-900 flex items-center gap-1">
-            <FileText className="h-4 w-4" />
-            <span>搜尋書籤</span>
-          </a>
-          <a href="#" className="text-gray-600 hover:text-gray-900 flex items-center gap-1">
-            <FileText className="h-4 w-4" />
+          <a 
+            href="#" 
+            className="text-gray-600 hover:text-gray-900 flex items-center gap-1"
+            onClick={(e) => {
+              e.preventDefault();
+              setTitleCleanerOpen(true);
+            }}
+          >
+            <FileX className="h-4 w-4" />
             <span>移除贅詞</span>
           </a>
         </nav>
       </div>
+
+      <TitleCleaner
+        open={titleCleanerOpen}
+        onOpenChange={setTitleCleanerOpen}
+        sections={sections}
+        onApplyChanges={onUpdateBookmarkTitles || (() => {})}
+        onUndoLastChange={onUndoTitleChanges || (() => {})}
+        canUndo={canUndoTitleChanges}
+      />
     </header>
   );
 };
