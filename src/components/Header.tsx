@@ -19,7 +19,7 @@ const Header: React.FC<HeaderProps> = ({ title }) => {
             <span>匯入書籤</span>
           </a>
           <a href="#" className="text-gray-600 hover:text-gray-900 flex items-center gap-1">
-            <FileExport className="h-4 w-4" />
+            <FileText className="h-4 w-4" /> {/* Changed from FileExport */}
             <span>匯出書籤</span>
           </a>
           <a href="#" className="text-gray-600 hover:text-gray-900 flex items-center gap-1">
