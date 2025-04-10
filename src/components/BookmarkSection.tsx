@@ -82,22 +82,23 @@ const BookmarkSection: React.FC<BookmarkSectionProps> = ({
     if (!term.trim()) return text;
     
     const regex = new RegExp(`(${term.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi');
-    return text.replace(regex, '<mark class="bg-yellow-200">$1</mark>');
+    return text.replace(regex, '<mark class="bg-yellow-200 rounded px-0.5">$1</mark>');
   };
 
   return (
     <div 
       className={cn(
-        "flex flex-col h-full border-r border-gray-200 bg-white",
-        isDragging && "bg-blue-50"
+        "flex flex-col h-full border-r",
+        isDragging ? "bg-blue-50" : "bg-white"
       )}
       onDragOver={onDragOver}
       onDrop={onDrop}
     >
-      <div className="p-3 border-b border-gray-200 flex items-center justify-between">
+      <div className="p-3 border-b border-blue-100 flex items-center justify-between bg-gradient-to-r from-blue-50 to-indigo-50">
         <button
           onClick={toggleSortDirection}
-          className="flex items-center text-gray-700 hover:text-gray-900"
+          className="flex items-center text-slate-600 hover:text-blue-700 p-1.5 rounded-full hover:bg-blue-100/50 transition-colors"
+          title={sortDirection === "asc" ? "升序排列" : "降序排列"}
         >
           {sortDirection === "asc" ? <ArrowUp size={16} /> : <ArrowDown size={16} />}
         </button>
@@ -106,7 +107,7 @@ const BookmarkSection: React.FC<BookmarkSectionProps> = ({
           value={sortBy}
           onValueChange={(value) => setSortBy(value as "title" | "date")}
         >
-          <SelectTrigger className="w-32 h-8 text-xs">
+          <SelectTrigger className="w-32 h-8 text-xs border-blue-100 bg-white/80 focus:ring-blue-200">
             <SelectValue placeholder="排序方式" />
           </SelectTrigger>
           <SelectContent>
@@ -117,18 +118,18 @@ const BookmarkSection: React.FC<BookmarkSectionProps> = ({
         
         <button
           onClick={onRemove}
-          className="p-1 text-gray-500 hover:bg-gray-100 rounded-full"
+          className="p-1.5 text-slate-500 hover:text-red-500 rounded-full hover:bg-red-50 transition-colors"
           title="移除此窗口"
         >
           <Minus size={16} />
         </button>
       </div>
       
-      <div className="p-2 border-b border-gray-200 relative">
+      <div className="p-2 border-b border-blue-100 relative">
         <div className="relative">
-          <Search className="absolute left-2 top-2.5 h-4 w-4 text-gray-400" />
+          <Search className="absolute left-3 top-2.5 h-4 w-4 text-slate-400" />
           <Input
-            className="pl-8 pr-4 py-2 w-full text-sm bg-gray-50 focus:bg-white"
+            className="pl-9 pr-4 py-2 w-full text-sm bg-white border-blue-100 focus:border-blue-200 focus:ring-blue-200"
             placeholder="搜索書籤..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
@@ -138,17 +139,20 @@ const BookmarkSection: React.FC<BookmarkSectionProps> = ({
       
       <div className="flex-grow overflow-y-auto">
         {filteredBookmarks.length === 0 ? (
-          <div className="p-4 text-center text-gray-500 text-sm">
-            沒有找到匹配的書籤
+          <div className="p-8 text-center text-gray-500 text-sm">
+            <div className="inline-block p-3 bg-slate-50 rounded-full mb-2">
+              <Search className="h-5 w-5 text-slate-400" />
+            </div>
+            <div>沒有找到匹配的書籤</div>
           </div>
         ) : (
-          <ul className="divide-y divide-gray-100">
+          <ul className="space-y-1 p-1">
             {filteredBookmarks.map((bookmark, index) => (
               <li key={bookmark.id}>
                 <div
                   className={cn(
-                    "w-full text-left p-3 hover:bg-blue-50 transition-colors",
-                    "flex items-start gap-3 cursor-move relative"
+                    "w-full text-left p-3 rounded-lg hover:bg-blue-50 transition-all duration-200",
+                    "flex items-start gap-3 cursor-move group"
                   )}
                   draggable
                   onDragStart={(e) => {
@@ -163,7 +167,7 @@ const BookmarkSection: React.FC<BookmarkSectionProps> = ({
                   onDragEnd={onDragEnd}
                   onClick={() => onSelectBookmark(bookmark)}
                 >
-                  <div className="flex-shrink-0 w-5 h-5 mt-0.5">
+                  <div className="flex-shrink-0 w-6 h-6 mt-0.5 rounded-md overflow-hidden bg-gradient-to-br from-blue-100 to-indigo-100 flex items-center justify-center">
                     {bookmark.favicon ? (
                       <img
                         src={bookmark.favicon}
@@ -171,8 +175,8 @@ const BookmarkSection: React.FC<BookmarkSectionProps> = ({
                         className="w-full h-full object-contain"
                       />
                     ) : (
-                      <div className="w-full h-full bg-gray-200 rounded-sm flex items-center justify-center text-xs text-gray-500">
-                        {bookmark.title.charAt(0)}
+                      <div className="w-full h-full flex items-center justify-center text-xs font-medium text-blue-600">
+                        {bookmark.title.charAt(0).toUpperCase()}
                       </div>
                     )}
                   </div>
@@ -191,14 +195,14 @@ const BookmarkSection: React.FC<BookmarkSectionProps> = ({
                     />
                     {bookmark.folder && (
                       <div 
-                        className="mt-1 text-xs px-1.5 py-0.5 bg-gray-100 text-gray-600 rounded inline-block"
+                        className="mt-1 text-xs px-2 py-0.5 bg-slate-100 text-slate-600 rounded-full inline-block"
                         dangerouslySetInnerHTML={{
                           __html: highlightMatch(bookmark.folder, searchTerm)
                         }}
                       />
                     )}
                   </div>
-                  <Move size={14} className="text-gray-400 absolute right-2 top-3 opacity-50" />
+                  <Move size={14} className="text-slate-400 opacity-0 group-hover:opacity-100 transition-opacity" />
                 </div>
               </li>
             ))}

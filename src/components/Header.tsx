@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { Bookmark, FileText, Import, Share2, FileX } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
@@ -101,46 +102,38 @@ const Header: React.FC<HeaderProps> = ({
   };
 
   return (
-    <header className="bg-white border-b border-gray-200 py-4 px-6 flex items-center">
-      <Bookmark className="h-6 w-6 text-blue-600 mr-2" />
-      <h1 className="text-xl font-bold text-gray-800">{title}</h1>
-      
-      <div className="ml-auto">
-        <nav className="flex gap-4">
-          <a 
-            href="#" 
-            className="text-gray-600 hover:text-gray-900 flex items-center gap-1"
-            onClick={(e) => {
-              e.preventDefault();
-              handleImportBookmarks();
-            }}
-          >
-            <Import className="h-4 w-4" />
-            <span>匯入書籤</span>
-          </a>
-          <a 
-            href="#" 
-            className="text-gray-600 hover:text-gray-900 flex items-center gap-1"
-            onClick={(e) => {
-              e.preventDefault();
-              handleExportBookmarks();
-            }}
-          >
-            <Share2 className="h-4 w-4" />
-            <span>匯出書籤</span>
-          </a>
-          <a 
-            href="#" 
-            className="text-gray-600 hover:text-gray-900 flex items-center gap-1"
-            onClick={(e) => {
-              e.preventDefault();
-              setTitleCleanerOpen(true);
-            }}
-          >
-            <FileX className="h-4 w-4" />
-            <span>移除贅詞</span>
-          </a>
-        </nav>
+    <header className="bg-gradient-to-r from-blue-50 to-indigo-50 border-b border-blue-100 py-4 px-6 shadow-sm">
+      <div className="flex items-center">
+        <div className="flex items-center">
+          <Bookmark className="h-6 w-6 text-blue-600 mr-2" />
+          <h1 className="text-xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">{title}</h1>
+        </div>
+        
+        <div className="ml-auto">
+          <nav className="flex gap-4">
+            <button 
+              className="text-slate-600 hover:text-blue-700 flex items-center gap-2 px-3 py-1.5 rounded-full transition-colors hover:bg-blue-50"
+              onClick={handleImportBookmarks}
+            >
+              <Import className="h-4 w-4" />
+              <span className="font-medium">匯入書籤</span>
+            </button>
+            <button 
+              className="text-slate-600 hover:text-blue-700 flex items-center gap-2 px-3 py-1.5 rounded-full transition-colors hover:bg-blue-50"
+              onClick={handleExportBookmarks}
+            >
+              <Share2 className="h-4 w-4" />
+              <span className="font-medium">匯出書籤</span>
+            </button>
+            <button 
+              className="text-slate-600 hover:text-blue-700 flex items-center gap-2 px-3 py-1.5 rounded-full transition-colors hover:bg-blue-50"
+              onClick={() => setTitleCleanerOpen(true)}
+            >
+              <FileX className="h-4 w-4" />
+              <span className="font-medium">移除贅詞</span>
+            </button>
+          </nav>
+        </div>
       </div>
 
       <TitleCleaner
